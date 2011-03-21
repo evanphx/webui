@@ -24,9 +24,24 @@ VALUE run_window(VALUE self) {
   return self;
 }
 
+VALUE run_js(VALUE self, VALUE str) {
+  char* ret;
+  int ret_sz;
+
+  StringValue(str);
+
+  plat_run_js(RSTRING_PTR(str), RSTRING_LEN(str), &ret, &ret_sz);
+
+  VALUE out = rb_str_new(ret, ret_sz);
+  free(ret);
+
+  return out;
+}
+
 void Init_webui_platform() {
   VALUE cls = rb_define_class("WebUI", rb_cObject);
   rb_define_singleton_method(cls, "create_window", create_window, 2);
   rb_define_singleton_method(cls, "load_url", load_url, 1);
+  rb_define_singleton_method(cls, "run_js", run_js, 1);
   rb_define_singleton_method(cls, "run", run_window, 0);
 }

@@ -5,3 +5,5 @@ WebUI.load_url "http://google.com"
 WebUI.run
 
 puts "done!"
+
+p WebUI.run_js("location.href")

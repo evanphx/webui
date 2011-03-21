@@ -45,6 +45,27 @@ void plat_create_window(int w, int h) {
   [window setContentView:global_webview];
 }
 
+void plat_run_js(char* ptr, int sz, char** ret, int* ret_sz) {
+  NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];
+
+  NSStringEncoding enc = NSASCIIStringEncoding;
+
+  NSString* code = [[NSString alloc] initWithBytes:ptr
+                                            length:sz
+                                          encoding:enc];
+
+  NSString* val = [[global_webview windowScriptObject] evaluateWebScript:code];
+
+  int out_sz = [val lengthOfBytesUsingEncoding:enc];
+  char* new_str = (char*)malloc(out_sz);
+  memcpy(new_str, [val cStringUsingEncoding:enc], out_sz);
+
+  [pool release];
+
+  *ret = new_str;
+  *ret_sz = out_sz;
+}
+
 void plat_load_url(void* ptr, int sz) {
   NSStringEncoding enc = NSASCIIStringEncoding;
 
