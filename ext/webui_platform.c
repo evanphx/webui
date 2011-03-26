@@ -20,18 +20,20 @@ static VALUE cWindow;
 
 static VALUE init(VALUE self) {
   plat_init();
+  return self;
 }
 
 static VALUE close_app(VALUE self) {
   plat_close_app();
+  return self;
 }
 
-static VALUE window_mark(void* obj) {
+static void window_mark(void* obj) {
   struct window_state* state = obj;
   rb_gc_mark(state->window);
 }
 
-static VALUE window_free(void* obj) {
+static void window_free(void* obj) {
   struct window_state* state = obj;
 
   plat_free(state->plat_state);
@@ -49,18 +51,43 @@ static VALUE create_window(VALUE self, VALUE width, VALUE height) {
   return window;
 }
 
+#ifdef HAVE_RB_THREAD_BLOCKING_REGION
+
+static VALUE run_loop_unlocked(void* unused) {
+  plat_run_loop();
+  return Qnil;
+}
+
+static VALUE run_loop(VALUE self) {
+  rb_thread_blocking_region(run_loop_unlocked, 0, 0, 0);
+  return self;
+}
+
+static VALUE run_once_unlocked(void* unused) {
+  plat_run_once();
+  return Qnil;
+}
+
+static VALUE run_once(VALUE self) {
+  rb_thread_blocking_region(run_once_unlocked, 0, 0, 0);
+  return self;
+}
+
+#else
 static VALUE run_loop(VALUE self) {
   plat_run_loop();
   return self;
 }
 
+static VALUE run_once(VALUE self) {
+  plat_run_once();
+  return self;
+}
+#endif
+
 static VALUE stop_loop(VALUE self) {
   plat_stop_loop();
   return self;
-}
-
-static VALUE run_once(VALUE self) {
-  plat_run_once();
 }
 
 static VALUE load_url(VALUE self, VALUE url) {
@@ -115,16 +142,54 @@ void convert_to_js_value(VALUE obj, struct js_value* val) {
   }
 }
 
+#ifdef HAVE_RB_THREAD_BLOCKING_REGION
+
+struct prop_request {
+  void* tag;
+  const char* prop;
+  struct js_value* val;
+};
+
+void* request_prop_unlocked(void* arg) {
+  struct prop_request* req = arg;
+  struct window_state* state = req->tag;
+
+  VALUE ret = rb_funcall(state->window, id_get_prop, 1, rb_str_new2(req->prop));
+  convert_to_js_value(ret, req->val);
+  return 0;
+}
+
+void request_prop(void* tag, const char* prop, struct js_value* val) {
+  struct prop_request req = {tag, prop, val};
+  rb_thread_call_with_gvl(request_prop_unlocked, &req);
+}
+#else
 void request_prop(void* tag, const char* prop, struct js_value* val) {
   struct window_state* state = tag;
+
   VALUE ret = rb_funcall(state->window, id_get_prop, 1, rb_str_new2(prop));
   convert_to_js_value(ret, val);
 }
+#endif
 
+#ifdef HAVE_RB_THREAD_BLOCKING_REGION
+
+void* request_window_close_locked(void* tag) {
+  struct window_state* state = tag;
+  rb_funcall(state->window, id_close, 0);
+  return 0;
+}
+
+void request_window_close(void* tag) {
+  rb_thread_call_with_gvl(&request_window_close_locked, tag);
+}
+
+#else
 void request_window_close(void* tag) {
   struct window_state* state = tag;
   rb_funcall(state->window, id_close, 0);
 }
+#endif
 
 void Init_webui_platform() {
   id_get_prop = rb_intern("get_property");

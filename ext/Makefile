@@ -4,69 +4,72 @@ SHELL = /bin/sh
 #### Start of system configuration section. ####
 
 srcdir = .
-topdir = /System/Library/Frameworks/Ruby.framework/Versions/1.8/usr/lib/ruby/1.8/universal-darwin10.0
+topdir = /usr/local/rubinius/1.2.3/include
 hdrdir = $(topdir)
 VPATH = $(srcdir):$(topdir):$(hdrdir)
+prefix = $(DESTDIR)/usr/local/rubinius/1.2.3
 exec_prefix = $(prefix)
-prefix = $(DESTDIR)/System/Library/Frameworks/Ruby.framework/Versions/1.8/usr
-sharedstatedir = $(prefix)/com
-mandir = $(DESTDIR)/usr/share/man
-psdir = $(docdir)
-oldincludedir = $(DESTDIR)/usr/include
-localedir = $(datarootdir)/locale
-bindir = $(exec_prefix)/bin
-libexecdir = $(exec_prefix)/libexec
-sitedir = $(DESTDIR)/Library/Ruby/Site
-htmldir = $(docdir)
-vendorarchdir = $(vendorlibdir)/$(sitearch)
+install_prefix = $(DESTDIR)
 includedir = $(prefix)/include
-infodir = $(DESTDIR)/usr/share/info
-vendorlibdir = $(vendordir)/$(ruby_version)
+bindir = $(DESTDIR)/usr/local/rubinius/1.2.3/bin
 sysconfdir = $(prefix)/etc
+localedir = $(datarootdir)/locale
+rubylibdir = $(DESTDIR)/usr/local/rubinius/1.2.3/site
+sitedir = $(DESTDIR)/usr/local/rubinius/1.2.3/site
+oldincludedir = $(DESTDIR)/usr/include
+libexecdir = $(exec_prefix)/libexec
+rubyhdrdir = $(DESTDIR)/usr/local/rubinius/1.2.3/include
 libdir = $(exec_prefix)/lib
-sbindir = $(exec_prefix)/sbin
-rubylibdir = $(libdir)/ruby/$(ruby_version)
-docdir = $(datarootdir)/doc/$(PACKAGE)
 dvidir = $(docdir)
-vendordir = $(libdir)/ruby/vendor_ruby
-datarootdir = $(prefix)/share
-pdfdir = $(docdir)
-archdir = $(rubylibdir)/$(arch)
-sitearchdir = $(sitelibdir)/$(sitearch)
+docdir = $(datarootdir)/doc/$(PACKAGE)
+psdir = $(docdir)
+infodir = $(datarootdir)/info
 datadir = $(datarootdir)
+archdir = $(DESTDIR)/usr/local/rubinius/1.2.3/site/x86_64-darwin10.6.0
+sharedstatedir = $(prefix)/com
 localstatedir = $(prefix)/var
-sitelibdir = $(sitedir)/$(ruby_version)
+pdfdir = $(docdir)
+htmldir = $(docdir)
+datarootdir = $(prefix)/share
+sbindir = $(exec_prefix)/sbin
+sitelibdir = $(DESTDIR)/usr/local/rubinius/1.2.3/site
+mandir = $(datarootdir)/man
+sitearchdir = $(DESTDIR)/usr/local/rubinius/1.2.3/site/x86_64-darwin10.6.0
 
 CC = gcc
 LIBRUBY = $(LIBRUBY_SO)
-LIBRUBY_A = lib$(RUBY_SO_NAME)-static.a
-LIBRUBYARG_SHARED = -l$(RUBY_SO_NAME)
-LIBRUBYARG_STATIC = -l$(RUBY_SO_NAME)
+LIBRUBY_A = 
+LIBRUBYARG_SHARED = 
+LIBRUBYARG_STATIC = 
 
 RUBY_EXTCONF_H = 
-CFLAGS   =  -fno-common -arch i386 -arch x86_64 -g -Os -pipe -fno-common -DENABLE_DTRACE  -fno-common  -pipe -fno-common $(cflags) 
-INCFLAGS = -I. -I$(topdir) -I$(hdrdir) -I$(srcdir)
+cflags   = 
+optflags = 
+debugflags = 
+warnflags = 
+CFLAGS   =  -fPIC -ggdb3 -O2 -fPIC 
+INCFLAGS = -I. -I. -I/usr/local/rubinius/1.2.3/include -I.
 DEFS     = 
-CPPFLAGS =   -D_XOPEN_SOURCE -D_DARWIN_C_SOURCE $(DEFS) $(cppflags)
+CPPFLAGS =  
 CXXFLAGS = $(CFLAGS) 
-ldflags  = -L. -arch i386 -arch x86_64 
+ldflags  = 
 dldflags = 
 archflag = 
 DLDFLAGS = $(ldflags) $(dldflags) $(archflag)
-LDSHARED = cc -arch i386 -arch x86_64 -pipe -bundle -undefined dynamic_lookup
+LDSHARED = gcc -dynamic -bundle -undefined suppress -flat_namespace
 AR = ar
 EXEEXT = 
 
-RUBY_INSTALL_NAME = ruby
-RUBY_SO_NAME = ruby
-arch = universal-darwin10.0
-sitearch = universal-darwin10.0
+RUBY_INSTALL_NAME = rbx
+RUBY_SO_NAME = rubinius-1.2.3
+arch = x86_64-darwin10.6.0
+sitearch = x86_64-darwin10.6.0
 ruby_version = 1.8
-ruby = /System/Library/Frameworks/Ruby.framework/Versions/1.8/usr/bin/ruby
+ruby = /usr/local/rubinius/1.2.3/bin/rbx
 RUBY = $(ruby)
 RM = rm -f
 MAKEDIRS = mkdir -p
-INSTALL = /usr/bin/install -c
+INSTALL = install -c
 INSTALL_PROG = $(INSTALL) -m 0755
 INSTALL_DATA = $(INSTALL) -m 644
 COPY = cp
@@ -86,7 +89,7 @@ extout =
 extout_prefix = 
 target_prefix = 
 LOCAL_LIBS = 
-LIBS = $(LIBRUBYARG_SHARED)  -lpthread -ldl  -framework AppKit -framework WebKit
+LIBS = $(LIBRUBYARG_STATIC)   -framework AppKit -framework WebKit
 SRCS = webui_platform.c webui_mac.m
 OBJS = webui_platform.o webui_mac.o
 TARGET = webui_platform
@@ -100,20 +103,22 @@ RUBYLIBDIR    = $(sitelibdir)$(target_prefix)
 RUBYARCHDIR   = $(sitearchdir)$(target_prefix)
 
 TARGET_SO     = $(DLLIB)
-CLEANLIBS     = $(TARGET).bundle $(TARGET).il? $(TARGET).tds $(TARGET).map
-CLEANOBJS     = *.o *.a *.s[ol] *.pdb *.exp *.bak
+CLEANLIBS     = $(TARGET).bundle 
+CLEANOBJS     = *.o  *.bak
 
-all:		$(DLLIB)
-static:		$(STATIC_LIB)
+all:    $(DLLIB)
+static: $(STATIC_LIB)
+.PHONY: all install static install-so install-rb
+.PHONY: clean clean-so clean-rb
 
 clean:
-		@-$(RM) $(CLEANLIBS) $(CLEANOBJS) $(CLEANFILES)
+	@-$(RM) $(CLEANLIBS) $(CLEANOBJS) $(CLEANFILES)
 
-distclean:	clean
-		@-$(RM) Makefile $(RUBY_EXTCONF_H) conftest.* mkmf.log
-		@-$(RM) core ruby$(EXEEXT) *~ $(DISTCLEANFILES)
+distclean: clean
+	@-$(RM) Makefile $(RUBY_EXTCONF_H) conftest.* mkmf.log
+	@-$(RM) core ruby$(EXEEXT) *~ $(DISTCLEANFILES)
 
-realclean:	distclean
+realclean: distclean
 install: install-so install-rb
 
 install-so: $(RUBYARCHDIR)
