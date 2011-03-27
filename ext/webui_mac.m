@@ -63,7 +63,7 @@ JSValueRef ruby_getprop(JSContextRef ctx, JSObjectRef object,
                         JSStringRef propertyNameJS,
                         JSValueRef* exception)
 {
-  NSString*	prop = (NSString*)JSStringCopyCFString(kCFAllocatorDefault,
+  NSString* prop = (NSString*)JSStringCopyCFString(kCFAllocatorDefault,
                                                    propertyNameJS);
 
   [NSMakeCollectable(prop) autorelease];
