@@ -89,15 +89,17 @@ void* plat_create_window(void* tag, int w, int h) {
   gtk_signal_connect(GTK_OBJECT(window), "destroy",
                      GTK_SIGNAL_FUNC(close_window), state);
 
+  GtkWidget* scroll = gtk_scrolled_window_new(NULL, NULL);
   state->web_view = webkit_web_view_new();
 
-  gtk_container_add(GTK_CONTAINER(window), state->web_view);
-  gtk_widget_show(state->web_view);
-
-  gtk_widget_show(window);
+  gtk_container_add(GTK_CONTAINER(scroll), state->web_view);
+  gtk_container_add(GTK_CONTAINER(window), scroll);
 
   WebKitWebFrame* web_frame = webkit_web_view_get_main_frame(
                               WEBKIT_WEB_VIEW(state->web_view));
+
+  gtk_window_set_default_size(GTK_WINDOW(window), w, h);
+  gtk_widget_show_all(window);
 
   JSGlobalContextRef jsctx = webkit_web_frame_get_global_context(web_frame);
 
