@@ -7,7 +7,7 @@ class WebUI
     end
 
     def get_property(name)
-      puts "JS asked for '#{name}'"
+      puts "JS asked for '#{name}' on #{run_js('return location.href')}"
       "this is from ruby"
     end
 

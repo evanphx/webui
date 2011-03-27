@@ -129,8 +129,7 @@ void plat_run_js(struct gtk_state* state, char* ptr, int sz, char** ret, int* re
   JSObjectRef obj = JSObjectMakeFunction(state->jsctx, NULL, 0, 0, body,
                                          0, 0, &error);
 
-  JSObjectRef main = JSContextGetGlobalObject(state->jsctx);
-  JSValueRef val = JSObjectCallAsFunction(state->jsctx, obj, main, 0, 0, &error);
+  JSValueRef val = JSObjectCallAsFunction(state->jsctx, obj, NULL, 0, 0, &error);
   JSStringRef str = JSValueToStringCopy(state->jsctx, val, &error);
 
   int out_sz = JSStringGetLength(str);
