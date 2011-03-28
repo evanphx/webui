@@ -100,6 +100,7 @@ static VALUE load_url(VALUE self, VALUE url) {
   int size = RSTRING_LEN(url);
 
   plat_load_url(state->plat_state, ptr, size);
+  return url;
 }
 
 static VALUE run_js(VALUE self, VALUE str) {
